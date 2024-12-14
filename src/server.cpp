@@ -113,7 +113,13 @@ int main(int argc, char **argv) {
  vector<string>tokens = split_message(path,"/");
 
   if(path == "/") response = "HTTP/1.1 200 OK\r\n\r\n";
-  else if(tokens[1] == "echo") response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+to_string(tokens[2].length())+"\r\n\r\n"+tokens[2];
+  else if(tokens[1] == "echo") {
+    response = "HTTP/1.1 200 OK\r\n";
+    response += "Content-Type: text/plain\r\n";
+    response += "Content-Length: " + std::to_string(tokens[1].length()) + "\r\n";
+    response += "\r\n"; // End of headers
+    response += tokens[2]; // Body
+  }
   
   cout<<response<<endl;
 
