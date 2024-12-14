@@ -4,23 +4,52 @@
 #include <cstring>
 #include <unistd.h>
 #include <sys/types.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-// #include <winsock2.h>
-// #include <ws2tcpip.h>
+// #include <sys/socket.h>
+// #include <arpa/inet.h>
+// #include <netdb.h>
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include<bits/stdc++.h>
 
 using namespace std;
 
-// #pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "ws2_32.lib")
+
+// std::vector<std::string> split_message( std::string message, const std::string& delim) {
+//   std::vector<std::string> toks;
+//   stringstream ss(message);
+//   std::string line;
+//   while (getline(ss, line, *delim.begin())) {
+//     toks.push_back(line);
+//     // ss.ignore(delim.length() - 1);
+//   }
+//   return toks;
+// }
+
+vector<string> split_message(string path,  const string& deli){
+  vector<string>tok;
+  stringstream ss(path);
+  string word;
+  while(getline(ss,word,*deli.begin())){
+    tok.push_back(word);
+  }
+  return tok;
+}
+
+string get_path(string request){
+  vector<string> temp1 = split_message(request,"\r\n");
+  vector<string> temp2 = split_message(temp1[0]," ");
+  return temp2[1];
+}
+
 
 int main(int argc, char **argv) {
 
-  // WSADATA wsaData;
-  //   if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-  //       std::cerr << "Failed to initialize Winsock." << std::endl;
-  //       return 1;
-  //   }
+  WSADATA wsaData;
+    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+        std::cerr << "Failed to initialize Winsock." << std::endl;
+        return 1;
+    }
   // Flush after every std::cout / std::cerr
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
@@ -77,23 +106,22 @@ int main(int argc, char **argv) {
 
   char buf[1024];
 	int rc = recv(client_fd, buf, sizeof(buf), 0);
-  int i=0;
-  while(buf[i]!=' ') i++;
-  i++;
-  string url_path;
-  while(buf[i]!=' ') {
-    url_path+=buf[i];
-    i++;
-  }
+  string request(buf);
+  cout<<request<<endl;
 
+  string path  = get_path(request);
+ vector<string>tokens = split_message(path,"/");
 
-  if(url_path == "/") response = "HTTP/1.1 200 OK\r\n\r\n";
+  if(path == "/") response = "HTTP/1.1 200 OK\r\n\r\n";
+  else if(tokens[1] == "echo") response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: "+to_string(tokens[2].length())+"\r\n\r\n"+tokens[2];
+  
+  cout<<response<<endl;
 
   int data = write(client_fd, response.c_str(),sizeof(response));
 
   close(client_fd);
   close(server_fd);
 
-    // WSACleanup(); 
+    WSACleanup(); 
   return 0;
 }
