@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
   else if(tokens[1] == "echo") {
     response = "HTTP/1.1 200 OK\r\n";
     response += "Content-Type: text/plain\r\n";
-    response += "Content-Length: " + std::to_string(tokens[1].length()) + "\r\n";
+    response += "Content-Length: " + std::to_string(tokens[2].length()) + "\r\n";
     response += "\r\n"; // End of headers
     response += tokens[2]; // Body
   }
