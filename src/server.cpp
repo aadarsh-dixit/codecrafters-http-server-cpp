@@ -4,16 +4,16 @@
 #include <cstring>
 #include <unistd.h>
 #include <sys/types.h>
-// #include <sys/socket.h>
-// #include <arpa/inet.h>
-// #include <netdb.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+// #include <winsock2.h>
+// #include <ws2tcpip.h>
 #include<bits/stdc++.h>
 
 using namespace std;
 
-#pragma comment(lib, "ws2_32.lib")
+// #pragma comment(lib, "ws2_32.lib")
 
 // std::vector<std::string> split_message( std::string message, const std::string& delim) {
 //   std::vector<std::string> toks;
@@ -45,11 +45,11 @@ string get_path(string request){
 
 int main(int argc, char **argv) {
 
-  WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        std::cerr << "Failed to initialize Winsock." << std::endl;
-        return 1;
-    }
+  // WSADATA wsaData;
+  //   if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+  //       std::cerr << "Failed to initialize Winsock." << std::endl;
+  //       return 1;
+  //   }
   // Flush after every std::cout / std::cerr
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
@@ -122,6 +122,6 @@ int main(int argc, char **argv) {
   close(client_fd);
   close(server_fd);
 
-    WSACleanup(); 
+    // WSACleanup(); 
   return 0;
 }
