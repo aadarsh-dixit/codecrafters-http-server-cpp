@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
   
   cout<<response<<endl;
 
-  int data = write(client_fd, response.c_str(),sizeof(response));
+  int data = send(client_fd, response.c_str(),response.size(),0);
 
   close(client_fd);
   close(server_fd);
