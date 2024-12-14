@@ -61,7 +61,19 @@ int main(int argc, char **argv) {
     return 1;
   }
   std::cout << "Client connected\n";
-  std::string response = "HTTP/1.1 200 OK\r\n\r\n";
+  std::string response ="HTTP/1.1 404 Not Found\r\n\r\n";
+
+  char buf[1024];
+	int rc = recv(client_fd, &buf, sizeof(buf), 0);
+  int i=0;
+  while(buf[i]!=' ') i++;
+  i++;
+  string url_path;
+  while(buf[i]!=' ') {
+    url_path+=buf[i];
+  }
+  if(url_path == "/") response = "HTTP/1.1 200 OK\r\n\r\n";
+
   int data = write(client_fd, response.c_str(),sizeof(response));
   close(client_fd);
   close(server_fd);
