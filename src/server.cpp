@@ -105,6 +105,7 @@ void handling_each_client(int client_fd, string directory_path)
       {
         // Write data to the file
         int size = rn_seperated_header.size();
+        cout<<"*************************"<<endl;
         for(int i=0;i<size;i++){
           cout<<rn_seperated_header[i]<<endl;
         }
