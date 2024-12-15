@@ -4,11 +4,11 @@
 #include <cstring>
 #include <unistd.h>
 #include <sys/types.h>
-// #include <sys/socket.h>
-// #include <arpa/inet.h>
-// #include <netdb.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+// #include <winsock2.h>
+// #include <ws2tcpip.h>
 #include<thread>
 #include<bits/stdc++.h>
 
@@ -69,14 +69,14 @@ void handling_each_client(int client_fd){
   int data = send(client_fd, response.c_str(),response.size(),0);
 }
 
-#pragma comment(lib, "Ws2_32.lib")
+// #pragma comment(lib, "Ws2_32.lib")
 int main(int argc, char **argv) {
 
-  WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        std::cerr << "Failed to initialize Winsock." << std::endl;
-        return 1;
-    }
+  // WSADATA wsaData;
+  //   if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+  //       std::cerr << "Failed to initialize Winsock." << std::endl;
+  //       return 1;
+  //   }
   // Flush after every std::cout / std::cerr
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
@@ -139,6 +139,6 @@ int main(int argc, char **argv) {
 
   close(server_fd);
 
-    WSACleanup(); 
+    // WSACleanup(); 
   return 0;
 }
