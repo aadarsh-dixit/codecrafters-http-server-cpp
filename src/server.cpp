@@ -34,6 +34,40 @@ string get_header_data(string header){
   vector<string> temp2 = split_message(header," ");
   return temp2[1];
 }
+
+void handling_each_client(int client_fd){
+  std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
+
+  char buf[1024];
+	int rc = recv(client_fd, buf, sizeof(buf), 0);
+  string request(buf);
+  cout<<request<<endl;
+
+  string path  = get_path(request);
+  vector<string>tokens = split_message(path,"/");
+
+  if(path == "/") response = "HTTP/1.1 200 OK\r\n\r\n";
+  else if(tokens[1] == "echo") {
+    response = "HTTP/1.1 200 OK\r\n";
+    response += "Content-Type: text/plain\r\n";
+    response += "Content-Length: " + std::to_string(tokens[2].length()) + "\r\n";
+    response += "\r\n"; // End of headers
+    response += tokens[2]; // Body
+  }
+  else if(tokens[1]=="user-agent"){
+    string user_agent  = get_header_data(rn_seperated_header[2]);
+    response = "HTTP/1.1 200 OK\r\n";
+    response += "Content-Type: text/plain\r\n";
+    response += "Content-Length: " + std::to_string(user_agent.length()) + "\r\n";
+    response += "\r\n"; // End of headers
+    response += user_agent; // Body
+  }
+
+  cout<<response<<endl;
+
+  int data = send(client_fd, response.c_str(),response.size(),0);
+}
+
 // #pragma comment(lib, "Ws2_32.lib")
 int main(int argc, char **argv) {
 
@@ -86,46 +120,21 @@ int main(int argc, char **argv) {
   
   std::cout << "Waiting for a client to connect...\n";
   
-  int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
-  if(client_fd<0){
+  while(true){
+    int client_fd = accept(server_fd, (struct sockaddr *) &client_addr, (socklen_t *) &client_addr_len);
+    if(client_fd<0){
+      close(client_fd);
+      close(server_fd);
+      std::cout<<" Client connection failed/n";
+      return 1;
+    }
+    std::cout << "Client connected\n";
+    
+    thread t1(handling_each_client, client_fd);
     close(client_fd);
-    close(server_fd);
-    std::cout<<" Client connection failed/n";
-    return 1;
-  }
-  std::cout << "Client connected\n";
-  std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
-
-  char buf[1024];
-	int rc = recv(client_fd, buf, sizeof(buf), 0);
-  string request(buf);
-  cout<<request<<endl;
-
-  string path  = get_path(request);
- vector<string>tokens = split_message(path,"/");
-
-  if(path == "/") response = "HTTP/1.1 200 OK\r\n\r\n";
-  else if(tokens[1] == "echo") {
-    response = "HTTP/1.1 200 OK\r\n";
-    response += "Content-Type: text/plain\r\n";
-    response += "Content-Length: " + std::to_string(tokens[2].length()) + "\r\n";
-    response += "\r\n"; // End of headers
-    response += tokens[2]; // Body
-  }
-  else if(tokens[1]=="user-agent"){
-    string user_agent  = get_header_data(rn_seperated_header[2]);
-    response = "HTTP/1.1 200 OK\r\n";
-    response += "Content-Type: text/plain\r\n";
-    response += "Content-Length: " + std::to_string(user_agent.length()) + "\r\n";
-    response += "\r\n"; // End of headers
-    response += user_agent; // Body
   }
 
-  cout<<response<<endl;
 
-  int data = send(client_fd, response.c_str(),response.size(),0);
-
-  close(client_fd);
   close(server_fd);
 
     // WSACleanup(); 
