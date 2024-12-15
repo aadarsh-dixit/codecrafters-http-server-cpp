@@ -76,6 +76,8 @@ void handling_each_client(int client_fd, string directory_path){
   }
   else if(tokens[1]=="files"){
     string file_path = directory_path+tokens[2];
+    cout<<"filepath"<<endl;
+    cout<<file_path<<endl;
     string data_from_file = read_file_as_string(file_path);
     response = "HTTP/1.1 200 OK\r\n";
     response += "application/octet-stream\r\n";
