@@ -7,6 +7,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netdb.h>
+#include<sstream>
+#include<fstream>
 // #include <winsock2.h>
 // #include <ws2tcpip.h>
 #include<thread>
@@ -36,7 +38,16 @@ string get_header_data(string header){
   return temp2[1];
 }
 
-void handling_each_client(int client_fd){
+std::string read_file_as_string(const std::string& file_path) {
+    std::ifstream file(file_path);
+
+    std::stringstream buffer;
+    buffer << file.rdbuf(); // Read the entire file into the buffer
+    file.close(); // Close the file after reading
+    return buffer.str(); // Return the file content as a string
+}
+
+void handling_each_client(int client_fd, string directory_path){
   std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
 
   char buf[1024];
@@ -63,6 +74,15 @@ void handling_each_client(int client_fd){
     response += "\r\n"; // End of headers
     response += user_agent; // Body
   }
+  else if(tokens[1]=="files"){
+    string file_path = directory_path+tokens[2];
+    string data_from_file = read_file_as_string(file_path);
+    response = "HTTP/1.1 200 OK\r\n";
+    response += "application/octet-stream\r\n";
+    response += "Content-Length: " + std::to_string(data_from_file.length()) + "\r\n";
+    response += "\r\n"; // End of headers
+    response += data_from_file; // Body
+  }
 
   cout<<response<<endl;
 
@@ -86,7 +106,25 @@ int main(int argc, char **argv) {
   std::cout << "Logs from your program will appear here!\n";
 
   // Uncomment this block to pass the first stage
-  //
+  
+  // argc no of argument passed including the program name
+  // argv is char* array containt the arguments
+   
+  string directory_path ;
+
+  for(int i=0;i<argc;i++){
+    if(argv[i]=="--directory"){
+      if(i+1< argc){
+        directory_path = argv[i+1];
+      }
+      else{
+        directory_path = "";
+      } 
+    }
+    else directory_path = "";
+  }
+
+
   int server_fd = socket(AF_INET, SOCK_STREAM, 0);   //   TCP
   if (server_fd < 0) {
    std::cerr << "Failed to create server socket\n";
@@ -132,7 +170,7 @@ int main(int argc, char **argv) {
     }
     std::cout << "Client connected\n";
     
-    thread t1(handling_each_client, client_fd);
+    thread t1(handling_each_client, client_fd,directory_path);
     t1.detach();
     
   }
