@@ -75,13 +75,14 @@ void handling_each_client(int client_fd, string directory_path){
   }
   else if(tokens[1]=="files"){
     string file_path = directory_path+tokens[2];
-    if(!(filesystem::exits(file_path))) return response; 
-    string data_from_file = read_file_as_string(file_path);
+    if(filesystem::exists(file_path))
+    {string data_from_file = read_file_as_string(file_path);
     response = "HTTP/1.1 200 OK\r\n";
     response += "Content-Type: application/octet-stream\r\n";
     response += "Content-Length: " + std::to_string(data_from_file.length()) + "\r\n";
     response += "\r\n"; // End of headers
     response += data_from_file; // Body
+   }
   }
 
   cout<<response<<endl;
