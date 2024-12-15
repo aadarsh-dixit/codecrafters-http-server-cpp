@@ -40,7 +40,6 @@ string get_header_data(string header){
 
 std::string read_file_as_string(const std::string& file_path) {
     std::ifstream file(file_path);
-
     std::stringstream buffer;
     buffer << file.rdbuf(); // Read the entire file into the buffer
     file.close(); // Close the file after reading
@@ -76,10 +75,7 @@ void handling_each_client(int client_fd, string directory_path){
   }
   else if(tokens[1]=="files"){
     string file_path = directory_path+tokens[2];
-    cout<<"filepath"<<endl;
-    cout<<directory_path<<endl;
-    cout<<file_path<<endl; 
-    cout<<"filepath"<<endl;
+    if(!(filesystem::exits(file_path))) return response; 
     string data_from_file = read_file_as_string(file_path);
     response = "HTTP/1.1 200 OK\r\n";
     response += "Content-Type: application/octet-stream\r\n";
