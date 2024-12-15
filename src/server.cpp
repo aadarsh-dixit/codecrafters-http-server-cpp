@@ -67,6 +67,7 @@ void handling_each_client(int client_fd){
   cout<<response<<endl;
 
   int data = send(client_fd, response.c_str(),response.size(),0);
+  close(client_fd);
 }
 
 // #pragma comment(lib, "Ws2_32.lib")
@@ -133,7 +134,7 @@ int main(int argc, char **argv) {
     
     thread t1(handling_each_client, client_fd);
     t1.detach();
-    close(client_fd);
+    
   }
 
 
