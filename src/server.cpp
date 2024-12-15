@@ -115,11 +115,10 @@ int main(int argc, char **argv) {
   // argv is char* array containt the arguments
    
   string directory_path="";
-
   for(int i=0;i<argc;i++){
-    if(argv[i]=="--directory"){
+    if(string(argv[i])=="--directory"){
       if(i+1< argc){
-        directory_path = argv[i+1];
+        directory_path = string(argv[i+1]);
       }
     }
   }
