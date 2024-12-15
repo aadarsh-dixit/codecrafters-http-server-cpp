@@ -97,7 +97,7 @@ void handling_each_client(int client_fd, string directory_path){
 // #pragma comment(lib, "Ws2_32.lib")
 int main(int argc, char **argv) {
 
-  WSADATA wsaData;
+  // WSADATA wsaData;
     // if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
     //     std::cerr << "Failed to initialize Winsock." << std::endl;
     //     return 1;
