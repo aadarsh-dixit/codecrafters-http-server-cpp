@@ -16,16 +16,18 @@
 
 using namespace std;
 
-vector<string> split_message(string path, const string &deli)
-{
-  vector<string> tok;
-  stringstream ss(path);
-  string word;
-  while (getline(ss, word, *deli.begin()))
-  {
-    tok.push_back(word);
-  }
-  return tok;
+vector<string> split_message(const string &path, const string &deli) {
+    vector<string> tok;
+    size_t start = 0, end;
+
+    // Use `string::find` to locate the delimiter
+    while ((end = path.find(deli, start)) != string::npos) {
+        tok.push_back(path.substr(start, end - start)); // Extract substring
+        start = end + deli.length(); // Move past the delimiter
+    }
+    // Add the last part of the string (after the last delimiter)
+    tok.push_back(path.substr(start));
+    return tok;
 }
 
 vector<string> rn_seperated_header;
