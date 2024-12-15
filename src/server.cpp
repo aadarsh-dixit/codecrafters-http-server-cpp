@@ -77,7 +77,9 @@ void handling_each_client(int client_fd, string directory_path){
   else if(tokens[1]=="files"){
     string file_path = directory_path+tokens[2];
     cout<<"filepath"<<endl;
-    cout<<file_path<<endl;
+    cout<<directory_path<<endl;
+    cout<<file_path<<endl; 
+    cout<<"filepath"<<endl;
     string data_from_file = read_file_as_string(file_path);
     response = "HTTP/1.1 200 OK\r\n";
     response += "application/octet-stream\r\n";
@@ -95,11 +97,11 @@ void handling_each_client(int client_fd, string directory_path){
 // #pragma comment(lib, "Ws2_32.lib")
 int main(int argc, char **argv) {
 
-  // WSADATA wsaData;
-  //   if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-  //       std::cerr << "Failed to initialize Winsock." << std::endl;
-  //       return 1;
-  //   }
+  WSADATA wsaData;
+    // if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
+    //     std::cerr << "Failed to initialize Winsock." << std::endl;
+    //     return 1;
+    // }
   // Flush after every std::cout / std::cerr
   std::cout << std::unitbuf;
   std::cerr << std::unitbuf;
@@ -112,18 +114,14 @@ int main(int argc, char **argv) {
   // argc no of argument passed including the program name
   // argv is char* array containt the arguments
    
-  string directory_path ;
+  string directory_path="";
 
   for(int i=0;i<argc;i++){
     if(argv[i]=="--directory"){
       if(i+1< argc){
         directory_path = argv[i+1];
       }
-      else{
-        directory_path = "";
-      } 
     }
-    else directory_path = "";
   }
 
 
@@ -177,9 +175,7 @@ int main(int argc, char **argv) {
     
   }
 
-
   close(server_fd);
-
-    // WSACleanup(); 
+  // WSACleanup(); 
   return 0;
 }
