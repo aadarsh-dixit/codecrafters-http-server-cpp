@@ -105,6 +105,10 @@ void handling_each_client(int client_fd, string directory_path)
       {
         // Write data to the file
         int size = rn_seperated_header.size();
+        for(int i=0;i<size;i++){
+          cout<<rn_seperated_header[i]<<endl;
+        }
+        cout<<endl;
         file << rn_seperated_header[size-1];
         std::cout << "File created and data written successfully at: " << file_path << std::endl;
         // Close the file
