@@ -82,7 +82,7 @@ void handling_each_client(int client_fd, string directory_path)
   for(int i=0;i<individual_space_sperated.size();i++){
     if(individual_space_sperated[i][0]=="Accept-Encoding:"){
       for(int j=0;j<individual_space_sperated[i].size();j++){
-        if(individual_space_sperated[i][j]=="gzip"){
+        if(individual_space_sperated[i][j]=="gzip," || individual_space_sperated[i][j]=="gzip"){
           accept_encoding = "gzip";
           break;
         }
