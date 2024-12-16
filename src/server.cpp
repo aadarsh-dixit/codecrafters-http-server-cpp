@@ -89,7 +89,7 @@ void handling_each_client(int client_fd, string directory_path)
   else if (tokens[1] == "echo")
   {
     response = "HTTP/1.1 200 OK\r\n";
-    if(accept_encoding=="gzip") response+= " Content-Encoding: gzip";
+    if(accept_encoding=="gzip") response+= "Content-Encoding: gzip\r\n";
     response += "Content-Type: text/plain\r\n";
     response += "Content-Length: " + std::to_string(tokens[2].length()) + "\r\n";
     response += "\r\n";    // End of headers
@@ -99,7 +99,7 @@ void handling_each_client(int client_fd, string directory_path)
   {
     string user_agent = get_header_data(rn_seperated_header[2]);
     response = "HTTP/1.1 200 OK\r\n";
-    if(accept_encoding=="gzip") response+= " Content-Encoding: gzip";
+     if(accept_encoding=="gzip") response+= "Content-Encoding: gzip\r\n";
     response += "Content-Type: text/plain\r\n";
     response += "Content-Length: " + std::to_string(user_agent.length()) + "\r\n";
     response += "\r\n";     // End of headers
@@ -114,7 +114,7 @@ void handling_each_client(int client_fd, string directory_path)
       {
         string data_from_file = read_file_as_string(file_path);
         response = "HTTP/1.1 200 OK\r\n";
-        if(accept_encoding=="gzip") response+= " Content-Encoding: gzip";
+         if(accept_encoding=="gzip") response+= "Content-Encoding: gzip\r\n";
         response += "Content-Type: application/octet-stream\r\n";
         response += "Content-Length: " + std::to_string(data_from_file.length()) + "\r\n";
         response += "\r\n";         // End of headers
