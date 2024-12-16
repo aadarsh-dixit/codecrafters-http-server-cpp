@@ -69,19 +69,24 @@ void handling_each_client(int client_fd, string directory_path)
   string path = get_path(request);
   vector<string> tokens = split_message(path, "/");
 
-  vector<string> individual_space_sperated;
+  vector<vector<string>> individual_space_sperated;
 
 
   for(int i=0;i<rn_seperated_header.size();i++){
     vector<string>temp = split_message(rn_seperated_header[i]," ");
     for(int j=0;j<temp.size();j++){
-      individual_space_sperated.push_back(temp[j]);      
+      individual_space_sperated.push_back(temp);      
     }
   }
   
   for(int i=0;i<individual_space_sperated.size();i++){
-    if(individual_space_sperated[i]=="Accept-Encoding:"){
-      accept_encoding = individual_space_sperated[i+1];
+    if(individual_space_sperated[i][0]=="Accept-Encoding:"){
+      for(int j=0;j<individual_space_sperated[i].size();j++){
+        if(individual_space_sperated[i][j]=="gzip"){
+          accept_encoding = "gzip";
+          break;
+        }
+      }
       break;
     }
   }
