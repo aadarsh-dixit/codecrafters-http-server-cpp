@@ -12,9 +12,52 @@
 // #include <winsock2.h>
 // #include <ws2tcpip.h>
 #include <thread>
+#include <zlib.h>
 #include <bits/stdc++.h>
 
 using namespace std;
+
+std::string gzipCompress(const std::string &input)
+{
+  // Initialize the zlib structures
+  z_stream zs;
+  memset(&zs, 0, sizeof(zs));
+
+  if (deflateInit2(&zs, Z_BEST_COMPRESSION, Z_DEFLATED, 15 | 16, 8, Z_DEFAULT_STRATEGY) != Z_OK)
+  {
+    throw std::runtime_error("Failed to initialize zlib.");
+  }
+
+  zs.next_in = reinterpret_cast<Bytef *>(const_cast<char *>(input.data()));
+  zs.avail_in = input.size();
+
+  int ret;
+  char outbuffer[32768];
+  std::string compressedData;
+
+  // Compress the data
+  do
+  {
+    zs.next_out = reinterpret_cast<Bytef *>(outbuffer);
+    zs.avail_out = sizeof(outbuffer);
+
+    ret = deflate(&zs, Z_FINISH);
+
+    if (compressedData.size() < zs.total_out)
+    {
+      compressedData.append(outbuffer, zs.total_out - compressedData.size());
+    }
+  } while (ret == Z_OK);
+
+  deflateEnd(&zs);
+
+  if (ret != Z_STREAM_END)
+  {
+    throw std::runtime_error("Failed to compress the data.");
+  }
+
+  return compressedData;
+}
 
 vector<string> split_message(const string &path, const string &deli)
 {
@@ -59,7 +102,7 @@ std::string read_file_as_string(const std::string &file_path)
 void handling_each_client(int client_fd, string directory_path)
 {
   std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
-  std::string accept_encoding  = "invalid-encoding";
+  std::string accept_encoding = "invalid-encoding";
 
   char buf[1024];
   int rc = recv(client_fd, buf, sizeof(buf), 0);
@@ -71,18 +114,23 @@ void handling_each_client(int client_fd, string directory_path)
 
   vector<vector<string>> individual_space_sperated;
 
-
-  for(int i=0;i<rn_seperated_header.size();i++){
-    vector<string>temp = split_message(rn_seperated_header[i]," ");
-    for(int j=0;j<temp.size();j++){
-      individual_space_sperated.push_back(temp);      
+  for (int i = 0; i < rn_seperated_header.size(); i++)
+  {
+    vector<string> temp = split_message(rn_seperated_header[i], " ");
+    for (int j = 0; j < temp.size(); j++)
+    {
+      individual_space_sperated.push_back(temp);
     }
   }
-  
-  for(int i=0;i<individual_space_sperated.size();i++){
-    if(individual_space_sperated[i][0]=="Accept-Encoding:"){
-      for(int j=0;j<individual_space_sperated[i].size();j++){
-        if(individual_space_sperated[i][j]=="gzip," || individual_space_sperated[i][j]=="gzip"){
+
+  for (int i = 0; i < individual_space_sperated.size(); i++)
+  {
+    if (individual_space_sperated[i][0] == "Accept-Encoding:")
+    {
+      for (int j = 0; j < individual_space_sperated[i].size(); j++)
+      {
+        if (individual_space_sperated[i][j] == "gzip," || individual_space_sperated[i][j] == "gzip")
+        {
           accept_encoding = "gzip";
           break;
         }
@@ -96,21 +144,35 @@ void handling_each_client(int client_fd, string directory_path)
   else if (tokens[1] == "echo")
   {
     response = "HTTP/1.1 200 OK\r\n";
-    if(accept_encoding == "gzip") response+= "Content-Encoding: gzip\r\n";
+    if (accept_encoding == "gzip")
+      response += "Content-Encoding: gzip\r\n";
     response += "Content-Type: text/plain\r\n";
     response += "Content-Length: " + std::to_string(tokens[2].length()) + "\r\n";
-    response += "\r\n";    // End of headers
-    response += tokens[2]; // Body
+    response += "\r\n"; // End of headers
+    if (accept_encoding == "gzip")
+    {
+      string compressed_body = gzipCompress(tokens[2]);
+      response += tokens[2];
+    }
+    else
+      response += tokens[2]; // Body
   }
   else if (tokens[1] == "user-agent")
   {
     string user_agent = get_header_data(rn_seperated_header[2]);
     response = "HTTP/1.1 200 OK\r\n";
-    if(accept_encoding=="gzip") response+= "Content-Encoding: gzip\r\n";
+    if (accept_encoding == "gzip")
+      response += "Content-Encoding: gzip\r\n";
     response += "Content-Type: text/plain\r\n";
     response += "Content-Length: " + std::to_string(user_agent.length()) + "\r\n";
-    response += "\r\n";     // End of headers
-    response += user_agent; // Body
+    response += "\r\n"; // End of headers
+    if (accept_encoding == "gzip")
+    {
+      string compressed_body = gzipCompress(tokens[2]);
+      response += tokens[2];
+    }
+    else
+      response += tokens[2]; // Body
   }
   else if (tokens[1] == "files")
   {
@@ -121,11 +183,18 @@ void handling_each_client(int client_fd, string directory_path)
       {
         string data_from_file = read_file_as_string(file_path);
         response = "HTTP/1.1 200 OK\r\n";
-         if(accept_encoding=="gzip") response+= "Content-Encoding: gzip\r\n";
+        if (accept_encoding == "gzip")
+          response += "Content-Encoding: gzip\r\n";
         response += "Content-Type: application/octet-stream\r\n";
         response += "Content-Length: " + std::to_string(data_from_file.length()) + "\r\n";
-        response += "\r\n";         // End of headers
-        response += data_from_file; // Body
+        response += "\r\n"; // End of headers
+        if (accept_encoding == "gzip")
+        {
+          string compressed_body = gzipCompress(tokens[2]);
+          response += tokens[2];
+        }
+        else
+          response += tokens[2]; // Body
       }
     }
     else if (rq_line_data[0] == "POST")
