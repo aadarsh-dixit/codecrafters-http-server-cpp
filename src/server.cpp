@@ -34,7 +34,6 @@ vector<string> split_message(const string &path, const string &deli)
 
 vector<string> rn_seperated_header;
 vector<string> rq_line_data;
-vector<string> individual_space_sperated;
 string get_path(string request)
 {
   rn_seperated_header = split_message(request, "\r\n");
@@ -70,6 +69,9 @@ void handling_each_client(int client_fd, string directory_path)
   string path = get_path(request);
   vector<string> tokens = split_message(path, "/");
 
+  vector<string> individual_space_sperated;
+
+
   for(int i=0;i<rn_seperated_header.size();i++){
     vector<string>temp = split_message(rn_seperated_header[i]," ");
     for(int j=0;j<temp.size();j++){
@@ -89,7 +91,7 @@ void handling_each_client(int client_fd, string directory_path)
   else if (tokens[1] == "echo")
   {
     response = "HTTP/1.1 200 OK\r\n";
-    if(accept_encoding=="gzip") response+= "Content-Encoding: gzip\r\n";
+    if(accept_encoding == "gzip") response+= "Content-Encoding: gzip\r\n";
     response += "Content-Type: text/plain\r\n";
     response += "Content-Length: " + std::to_string(tokens[2].length()) + "\r\n";
     response += "\r\n";    // End of headers
@@ -99,7 +101,7 @@ void handling_each_client(int client_fd, string directory_path)
   {
     string user_agent = get_header_data(rn_seperated_header[2]);
     response = "HTTP/1.1 200 OK\r\n";
-     if(accept_encoding=="gzip") response+= "Content-Encoding: gzip\r\n";
+    if(accept_encoding=="gzip") response+= "Content-Encoding: gzip\r\n";
     response += "Content-Type: text/plain\r\n";
     response += "Content-Length: " + std::to_string(user_agent.length()) + "\r\n";
     response += "\r\n";     // End of headers
