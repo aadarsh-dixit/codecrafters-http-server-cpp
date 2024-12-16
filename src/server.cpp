@@ -147,14 +147,16 @@ void handling_each_client(int client_fd, string directory_path)
     if (accept_encoding == "gzip")
       response += "Content-Encoding: gzip\r\n";
     response += "Content-Type: text/plain\r\n";
-    response += "Content-Length: " + std::to_string(tokens[2].length()) + "\r\n";
-    response += "\r\n"; // End of headers
     if (accept_encoding == "gzip")
     {
       string compressed_body = gzipCompress(tokens[2]);
-      response += tokens[2];
+      response += "Content-Length: " + std::to_string(compressed_body.length()) + "\r\n";
+      response += "\r\n"; // End of headers
+      response += compressed_body;
     }
     else
+      response += "Content-Length: " + std::to_string(tokens[2].length()) + "\r\n";
+      response += "\r\n"; // End of headers
       response += tokens[2]; // Body
   }
   else if (tokens[1] == "user-agent")
@@ -168,11 +170,15 @@ void handling_each_client(int client_fd, string directory_path)
     response += "\r\n"; // End of headers
     if (accept_encoding == "gzip")
     {
-      string compressed_body = gzipCompress(tokens[2]);
-      response += tokens[2];
+      string compressed_body = gzipCompress(user_agent);
+      response += "Content-Length: " + std::to_string(compressed_body.length()) + "\r\n";
+      response += "\r\n"; // End of headers
+      response += compressed_body;
     }
     else
-      response += tokens[2]; // Body
+      response += "Content-Length: " + std::to_string(user_agent.length()) + "\r\n";
+      response += "\r\n"; // End of headers
+      response += user_agent; // Body
   }
   else if (tokens[1] == "files")
   {
@@ -190,11 +196,15 @@ void handling_each_client(int client_fd, string directory_path)
         response += "\r\n"; // End of headers
         if (accept_encoding == "gzip")
         {
-          string compressed_body = gzipCompress(tokens[2]);
-          response += tokens[2];
+          string compressed_body = gzipCompress(data_from_file);
+          response += "Content-Length: " + std::to_string(compressed_body.length()) + "\r\n";
+          response += "\r\n"; // End of headers
+          response += compressed_body;
         }
         else
-          response += tokens[2]; // Body
+          response += "Content-Length: " + std::to_string(data_from_file.length()) + "\r\n";
+          response += "\r\n"; // End of headers
+          response += data_from_file; // Body
       }
     }
     else if (rq_line_data[0] == "POST")
