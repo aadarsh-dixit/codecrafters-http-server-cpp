@@ -16,22 +16,25 @@
 
 using namespace std;
 
-vector<string> split_message(const string &path, const string &deli) {
-    vector<string> tok;
-    size_t start = 0, end;
+vector<string> split_message(const string &path, const string &deli)
+{
+  vector<string> tok;
+  size_t start = 0, end;
 
-    // Use `string::find` to locate the delimiter
-    while ((end = path.find(deli, start)) != string::npos) {
-        tok.push_back(path.substr(start, end - start)); // Extract substring
-        start = end + deli.length(); // Move past the delimiter
-    }
-    // Add the last part of the string (after the last delimiter)
-    tok.push_back(path.substr(start));
-    return tok;
+  // Use `string::find` to locate the delimiter
+  while ((end = path.find(deli, start)) != string::npos)
+  {
+    tok.push_back(path.substr(start, end - start)); // Extract substring
+    start = end + deli.length();                    // Move past the delimiter
+  }
+  // Add the last part of the string (after the last delimiter)
+  tok.push_back(path.substr(start));
+  return tok;
 }
 
 vector<string> rn_seperated_header;
 vector<string> rq_line_data;
+vector<string> individual_space_sperated;
 string get_path(string request)
 {
   rn_seperated_header = split_message(request, "\r\n");
@@ -57,6 +60,7 @@ std::string read_file_as_string(const std::string &file_path)
 void handling_each_client(int client_fd, string directory_path)
 {
   std::string response = "HTTP/1.1 404 Not Found\r\n\r\n";
+  std::string accept_encoding  = "invalid-encoding";
 
   char buf[1024];
   int rc = recv(client_fd, buf, sizeof(buf), 0);
@@ -66,11 +70,26 @@ void handling_each_client(int client_fd, string directory_path)
   string path = get_path(request);
   vector<string> tokens = split_message(path, "/");
 
+  for(int i=0;i<rn_seperated_header.size();i++){
+    vector<string>temp = split_message(rn_seperated_header[i]," ");
+    for(int j=0;j<temp.size();j++){
+      individual_space_sperated.push_back(temp[j]);      
+    }
+  }
+  
+  for(int i=0;i<individual_space_sperated.size();i++){
+    if(individual_space_sperated[i]=="Accept-Encoding:"){
+      accept_encoding = individual_space_sperated[i+1];
+      break;
+    }
+  }
+
   if (path == "/")
     response = "HTTP/1.1 200 OK\r\n\r\n";
   else if (tokens[1] == "echo")
   {
     response = "HTTP/1.1 200 OK\r\n";
+    if(accept_encoding=="gzip") response+= " Content-Encoding: gzip";
     response += "Content-Type: text/plain\r\n";
     response += "Content-Length: " + std::to_string(tokens[2].length()) + "\r\n";
     response += "\r\n";    // End of headers
@@ -80,6 +99,7 @@ void handling_each_client(int client_fd, string directory_path)
   {
     string user_agent = get_header_data(rn_seperated_header[2]);
     response = "HTTP/1.1 200 OK\r\n";
+    if(accept_encoding=="gzip") response+= " Content-Encoding: gzip";
     response += "Content-Type: text/plain\r\n";
     response += "Content-Length: " + std::to_string(user_agent.length()) + "\r\n";
     response += "\r\n";     // End of headers
@@ -94,6 +114,7 @@ void handling_each_client(int client_fd, string directory_path)
       {
         string data_from_file = read_file_as_string(file_path);
         response = "HTTP/1.1 200 OK\r\n";
+        if(accept_encoding=="gzip") response+= " Content-Encoding: gzip";
         response += "Content-Type: application/octet-stream\r\n";
         response += "Content-Length: " + std::to_string(data_from_file.length()) + "\r\n";
         response += "\r\n";         // End of headers
@@ -107,12 +128,13 @@ void handling_each_client(int client_fd, string directory_path)
       {
         // Write data to the file
         int size = rn_seperated_header.size();
-        cout<<"*************************"<<endl;
-        for(int i=0;i<size;i++){
-          cout<<rn_seperated_header[i]<<endl;
+        cout << "*************************" << endl;
+        for (int i = 0; i < size; i++)
+        {
+          cout << rn_seperated_header[i] << endl;
         }
-        cout<<endl;
-        file << rn_seperated_header[size-1];
+        cout << endl;
+        file << rn_seperated_header[size - 1];
         std::cout << "File created and data written successfully at: " << file_path << std::endl;
         // Close the file
         file.close();
@@ -122,7 +144,7 @@ void handling_each_client(int client_fd, string directory_path)
         // Handle the error if the file could not be created
         std::cerr << "Failed to create the file at path: " << file_path << std::endl;
       }
-      response ="HTTP/1.1 201 Created\r\n\r\n";
+      response = "HTTP/1.1 201 Created\r\n\r\n";
     }
   }
 
